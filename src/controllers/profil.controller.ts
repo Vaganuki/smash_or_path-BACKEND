@@ -7,16 +7,16 @@ export const getPlayerbyId = async (req: Request, res: Response, next: NextFunct
     try {
         const { id } = req.params;
 
-        // * "User" DANS "db.User.findByPk(id);" À MODIFIER SELON SYNTAXE CHOISIE
-        const user = await db.User.findByPk(id);
+        // * "user" DANS "db.user.findByPk(id);" À MODIFIER SELON SYNTAXE CHOISIE
+        const player = await db.player.findByPk(id);
     
-        if (!user) {
+        if (!player) {
             const error = new Error("User not found !");
             (error as any).status = 404;
             throw error;
         }
     
-        res.status(200).json(user);
+        res.status(200).json(player);
     } catch (error) {
         next(error);
     }
