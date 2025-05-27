@@ -11,7 +11,7 @@ export const getPlayerbyId = async (req: Request, res: Response, next: NextFunct
         const user = await db.User.findByPk(id);
     
         if (!user) {
-            const error = new Error("Impossible de trouver cet utilisateur !");
+            const error = new Error("User not found !");
             (error as any).status = 404;
             throw error;
         }
