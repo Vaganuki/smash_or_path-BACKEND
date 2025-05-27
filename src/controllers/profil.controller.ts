@@ -12,7 +12,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
         if (result.rows.length === 0) {
             res.status(404).json({ error: 'Utilisateur non trouvé' });
-            return
+            return;
         }
 
         res.json({
