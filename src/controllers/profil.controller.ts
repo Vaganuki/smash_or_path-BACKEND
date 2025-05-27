@@ -3,63 +3,72 @@ import db from "../models";
 import argon2 from "argon2";
 import { Op } from "sequelize";
 
-
 export class ProfilController {
-//? modification d'un profiles
-static async updatePlayer (req: Request, res: Response){
-    try{
+    //? modification d'un profil
+    static async updatePlayer(req: Request, res: Response) {
+        try {
+            // Récupère l'ID de l'utilisateur connecté
+            const playerId = req.player?.id;
+            if (!playerId) {
+                return res.status(401).json({ error: "Unauthenticated user." });
+            }
 
-        // Récupère l'ID de l'utilisateur connecté
-        const playerId = req.player?.id;
-        if (!playerId) {
-            return res.status(401).json({ error: "Utilisateur non authentifié." });
+            const { favorite_champion_id, hated_champion_id, email, password, pseudo, elo, tournament_won, is_active } = req.body;
+
+            // Vérifie que tous les champs obligatoires sont remplis.
+            if (!favorite_champion_id && !hated_champion_id && !email && !password && !pseudo && !elo && !tournament_won, && !is_active) {
+                return res.status(400).json({ error: "No data to update." });
+            }
+
+            // Prépare l'objet de mise à jour
+            const updateFields: Partial<{
+                favorite_champion_id: string;
+                hated_champion_id: string;
+                email: string;
+                password: string;
+                pseudo: string;
+                elo: number;
+                tournament_won: number;
+                is_active: boolean;
+            }> = {};
+            if (favorite_champion_id) updateFields.favorite_champion_id = favorite_champion_id;
+            if (hated_champion_id) updateFields.hated_champion_id = hated_champion_id;
+            if (pseudo) updateFields.pseudo = pseudo;
+            if (elo) updateFields.elo = elo;
+            if (tournament_won) updateFields.tournament_won = tournament_won;
+            if (is_active) updateFields.is_active = is_active;
+            if (email) {
+                // Vérifier si l'email est déjà utilisé
+                const existingPlayerEmail = await db.player.findOne({ where: { email, id: { [Op.ne]: playerId } } });
+                if (existingPlayerEmail) {
+                    return res.status(409).json({ error: "This email is already in use." });
+                }
+                updateFields.email = email;
+            }
+            if (password) {
+                // Hacher le mot de passe avec argon2
+                updateFields.password = await argon2.hash(password);
+            }
+
+            // Met à jour le profil du joueur dans la base de données
+            const [updatedRowsCount, [updatedPlayer]] = await db.player.update(updateFields, {
+                where: { id: playerId }, // Met à jour uniquement le joueur connecté (par son id)
+                returning: true, // Retourne le joueur mis à jour (utile avec PostgreSQL)
+            });
+
+            // Vérifie si la mise à jour a bien eu lieu
+            if (updatedRowsCount === 0) {
+                return res.status(404).json({ error: "User not found." });
+            }
+
+            // Retourne un message de succès et l'utilisateur mis à jour
+            res.status(200).json({
+                message: "Your profile has been successfully updated.",
+                player: updatedPlayer,
+            });
+        } catch (error) {
+            console.error("Error while updating a user:", error);
+            res.status(500).json({ error: "Server error." });
         }
-
-        const {lastname, firstname, email, password, pseudo} = req.body
-
-        // Vérifie que tous les champs obligatoires sont remplis.
-        if (!lastname && !firstname && !email && !password && !pseudo){
-            return res.status(400).json({ error: "Aucune donnée à mettre à jour." });
-        }
-
-
-        // Prépare l'objet de mise à jour
-        const updateFields: any = {};
-        if (lastname) updateFields.lastname = lastname;
-        if (firstname) updateFields.firstname = firstname;
-        if (pseudo) updateFields.pseudo = pseudo;
-        if (email) {
-        // Vérifier si l'email est déjà utilisé
-        const existingPlayerEmail = await db.player.findOne({ where: { email, id: { [Op.ne]: playerId }} });
-        if (existingPlayerEmail) {
-            return res.status(409).json({ error: "Cet email est déjà utilisé." });
-        }
-            updateFields.email = email;
-        }
-        if (password){
-            // Hacher le mot de passe avec argon2
-            updateFields.password = await argon2.hash(password);
-        }
-
-        // Met à jour le profil du joueur dans la base de données
-        const [updatedRowsCount, [updatePlayer]] = await db.player.update(updateFields,{
-                where: { id: playerId },// Met à jour uniquement du joueur connecté (par son id)
-                returning: true,// Retourne le joueur mis à jour (utile avec PostgreSQL)
-        })
-
-        // Vérifie si la mise à jour a bien eu lieu
-        if (updatedRowsCount === 0) {
-            return res.status(404).json({ error: "Utilisateur non trouvé." });
-        }
-
-        // Retourne un message de succès et l'utilisateur mis à jour
-        res.status(200).json({
-            message: "Votre profil a bien été mis à jour.",
-            player: updatedPlayer
-        });
-    } catch (error) {
-        console.error("Erreur lors de la modification d'un utilisateur :", error);
-        res.status(500).json({ error: "Erreur serveur." });
     }
-}
 }
