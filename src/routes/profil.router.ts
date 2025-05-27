@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import { getUserProfile } from '../controllers/profil.controller';
+import { ProfileController } from '../controllers/profil.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 
 const router = Router();
+const profileController = new ProfileController();
 
-router.get('/profile', authenticateToken, getUserProfile);
+
+router.get('/profile', authenticateToken, profileController.profileConnection);
 
 export default router;
