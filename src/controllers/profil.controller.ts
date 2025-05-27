@@ -49,33 +49,4 @@ export class ProfilController {
         }
     };
 
-    profilConnection = async (req: Request, res: Response) => {
-        const userId = req.user?.userId;
-
-        if (!userId) {
-            res.status(401).json({ error: 'Unauthenticated user' });
-            return;
-        }
-
-        try {
-            const result = await db.query(
-                'SELECT username, email FROM player WHERE player_id = $1',
-                [userId]
-            );
-
-            if (result.rows.length === 0) {
-                res.status(404).json({ error: 'User not found' });
-                return;
-            }
-
-            res.json({
-                username: result.rows[0].username,
-                email: result.rows[0].email
-            });
-        } catch (error) {
-            console.error('Profile error:', error);
-            res.status(500).json({ error: 'Server error' });
-        }
-    };
-
 }
