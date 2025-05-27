@@ -1,32 +1,35 @@
 import { Request, Response } from 'express';
 import Player from '../config/models/player.model';   
-import Fight from '../config/models/fight.model';     
 import sequelize from '../config/database';         
 
 
 export class EloController {
-    private eloService: EloService;
     
     constructor() {
-        this.eloService = new EloService();
         this.matchResult = this.matchResult.bind(this);
         this.calculateEloChange = this.calculateEloChange.bind(this);
 
     }
-    
 
+    // Calcule les changements d'elo selon les règles du jeu
+    
     public async calculateEloChange(winnerData: { id: number, elo: number }, loserData: { id: number, elo: number }, winnerStocksRemaining: number){
-        let newWinnerElo:number;
+        let winnerEloChange: number;
+        
+        // Règle 1: calcul des points de base selon les stocks restants
         if (winnerStocksRemaining === 3) {
-            newWinnerElo = 50;
+            winnerEloChange = 50; // victoire parfaite (3 stocks à 0) = +50 points
+        } else {
+            winnerEloChange = winnerStocksRemaining * 10; // +10 points par stock restant
         }
-        else{
-            newWinnerElo = winnerStocksRemaining * 10; 
+        
+        if (winnerData.elo < loserData.elo) {
+            winnerEloChange += 0.1 * (loserData.elo - winnerData.elo); // +10% de la différence d'elo
         }
-        if (winnerData.elo < loserData.elo){
-            newWinnerElo += 0.1* (loserData.elo - winnerData.elo);
-        }
-        return {winnerEloChange: newWinnerElo, loserEloChange: -newWinnerElo};
+        
+        const loserEloChange = -winnerEloChange;
+        
+        return { winnerEloChange, loserEloChange };
     }
 
     public async matchResult(req: Request, res: Response): Promise<void> {
@@ -54,6 +57,7 @@ export class EloController {
                 res.status(400).json({ message: "Player 1 and Player 2 cannot be the same." });
                 return;
             }
+            
             if (winner_player_id !== player1_id && winner_player_id !== player2_id) {
                 await transaction.rollback();
                 res.status(400).json({ message: "Winner must be either Player 1 or Player 2." });
@@ -78,8 +82,10 @@ export class EloController {
                 await transaction.rollback();
                 res.status(404).json({ message: "One or both players not found." });
                 return;
-            }
-
+            }            
+            
+            // détermine qui est le gagnant et le perdant, ainsi que le nombre de stocks restants du gagnant
+            
             let winnerDB: Player, loserDB: Player;
             let winnerStocksRemaining: number;
 
@@ -93,48 +99,49 @@ export class EloController {
                 winnerStocksRemaining = score_p2; 
             }
 
+            // vérification que le gagnant ait au moins 1 stock restant (logique du jeu)
+            
             if (winnerStocksRemaining < 1 || winnerStocksRemaining > 3) {
                 await transaction.rollback();
                 res.status(400).json({
-                    message: "Invalid winner stocks remaining. Must be 1, 2, or 3 based on game rules for ELO calculation."
+                    message: "Invalid winner stocks remaining. Must be 1, 2, or 3 based on game rules for elo calculation."
                 });
                 return;
             }
 
-            const eloChanges = this.calculateEloChange({
-                winnerData: { id: winnerDB.player_id, elo: winnerDB.elo },
-                loserData: { id: loserDB.player_id, elo: loserDB.elo },
-                winnerStocksRemaining: winnerStocksRemaining
-            });
+            // calcul des changements d'elo selon les règles définies
+            
+            const eloChanges = await this.calculateEloChange(
+                { id: winnerDB.player_id, elo: winnerDB.elo },
+                { id: loserDB.player_id, elo: loserDB.elo },
+                winnerStocksRemaining
+            );
 
-
+            // application des changements d'elo aux joueurs
+            
             let newWinnerElo = winnerDB.elo + eloChanges.winnerEloChange;
             let newLoserElo = loserDB.elo + eloChanges.loserEloChange; 
 
+            // garantit que l'elo ne descend jamais en-dessous de -5
+            
             newLoserElo = Math.max(-5, newLoserElo);
 
+            // mise à jour des elo dans les objets joueurs
+            
             winnerDB.elo = newWinnerElo;
             loserDB.elo = newLoserElo;
+
+            // sauvegarde des modifications en base de données
 
             await winnerDB.save({ transaction });
             await loserDB.save({ transaction });
 
-            
-            const newFight = await Fight.create({
-                player1_id: player1.player_id, 
-                player2_id: player2.player_id,
-                score_p1, 
-                score_p2, 
-                winner_player_id: winnerDB.player_id, 
-                
-            }, { transaction });
-
+            // validation de la transaction et réponse avec les détails du match
             
             await transaction.commit();
 
             res.status(200).json({
-                message: "Match result recorded and ELOs updated successfully.",
-                fight_id: newFight.fight_id,
+                message: "Match result recorded and elos updated successfully.",
                 winner: {
                     player_id: winnerDB.player_id,
                     pseudo: winnerDB.pseudo,
@@ -152,6 +159,8 @@ export class EloController {
             });
 
         } catch (error) {
+
+            // gestion des erreurs et rollback de la transaction en cas de problème
             
             if (transaction) await transaction.rollback();
 
