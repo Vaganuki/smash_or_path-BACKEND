@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { db } from '../config/database';
 
-export class ProfileController {
+export class ProfilController {
 
-    profileConnection = async (req: Request, res: Response) => {
+    profilConnection = async (req: Request, res: Response) => {
         const userId = req.user?.userId;
 
         if (!userId) {
