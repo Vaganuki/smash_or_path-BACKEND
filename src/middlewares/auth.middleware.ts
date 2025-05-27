@@ -16,7 +16,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ error: 'Token manquant ou invalide' });
+        res.status(401).json({ error: 'Missing or invalid token' });
         return;
     }
 
@@ -28,7 +28,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
         next();
     } catch (err) {
-        res.status(403).json({ error: 'Token invalide ou expiré' });
+        res.status(403).json({ error: 'Expired or invalid token' });
         return;
     }
 };
