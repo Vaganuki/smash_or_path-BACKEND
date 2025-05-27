@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { db } from '../config/database';
 import jwt from 'jsonwebtoken';
 import argon2 from 'argon2';
+import { Player } from '../config/models/player';
 
 export class ProfilController {
 
@@ -9,27 +9,21 @@ export class ProfilController {
         const { email, password } = req.body;
 
         try {
-            const result = await db.query(
-                'SELECT * FROM player WHERE email = $1',
-                [email]
-            );
+            const player = await Player.findOne({
+                where: { email }
+            });
 
-            if (result.rows.length === 0) {
-                res.status(401).json({ error: 'Invalid email or password' });
-                return;
+            if (!player) {
+                return res.status(401).json({ error: 'Invalid email or password' });
             }
 
-            const user = result.rows[0];
-
-            const isValid = await argon2.verify(user.password, password);
+            const isValid = await argon2.verify(player.password, password);
             if (!isValid) {
-                res.status(401).json({ error: 'Invalid email or password' });
-                return;
+                return res.status(401).json({ error: 'Invalid email or password' });
             }
 
-            // ✅ Génère le token avec player_id
             const token = jwt.sign(
-                { userId: user.player_id },
+                { userId: player.player_id },
                 process.env.JWT_SECRET as string,
                 { expiresIn: '3h' }
             );
@@ -37,9 +31,9 @@ export class ProfilController {
             res.json({
                 token,
                 user: {
-                    id: user.player_id,
-                    username: user.username,
-                    email: user.email
+                    id: player.player_id,
+                    username: player.username,
+                    email: player.email
                 }
             });
 
@@ -48,5 +42,4 @@ export class ProfilController {
             res.status(500).json({ error: 'Server error' });
         }
     };
-
 }
