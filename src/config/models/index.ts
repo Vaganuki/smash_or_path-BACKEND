@@ -8,7 +8,7 @@ import skinBuilder from './skin.model';
 import fightBuilder from './fight.model';
 import tournamentBuilder from './tournament.model';
 import historyBuilder from './history.model';
-import tournamentHistoryBuilder from './tournamentHistory';
+import tournamentHistoryBuilder from './tournament_history.model';
 import prefersBuilder from './prefers.model';
 import eatsBuilder from './eats.model';
 import playsBuilder from './plays.model';

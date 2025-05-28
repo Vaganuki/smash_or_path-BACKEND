@@ -2,7 +2,7 @@ import {Skin} from "../../@types/types";
 import {DataTypes, Sequelize, Model} from "sequelize";
 
 export default (sequelize: Sequelize) => {
-    const SkinModel = sequelize.define<Skin>(
+    return sequelize.define<Model<Skin>>(
         "skin",
         {
             skin_id:{
@@ -25,5 +25,4 @@ export default (sequelize: Sequelize) => {
             timestamps: false
         }
     );
-    return SkinModel;
 };

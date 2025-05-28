@@ -1,9 +1,9 @@
-import { DataTypes, Sequelize    } from "sequelize";
+import {DataTypes, Model, Sequelize} from "sequelize";
 import { History } from "../../@types/types";
 
 
 export default (sequelize:Sequelize) =>{
-    const historyModel = sequelize.define<History>(
+    return sequelize.define<Model<History>>(
         "history",
         {
             history_id:{
@@ -22,8 +22,6 @@ export default (sequelize:Sequelize) =>{
         },
         {
             tableName:"history",
-            timestamps:"false",
         }
     );
-    return historyModel;
 };

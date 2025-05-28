@@ -1,8 +1,8 @@
-import { DataTypes, Sequelize } from "sequelize";
+import {DataTypes, Model, Sequelize} from "sequelize";
 import { Player } from "../../@types/types";
 
 export default (sequelize: Sequelize) => {
-    const PlayerModel = sequelize.define<Player>(
+    return sequelize.define<Model<Player>>(
         "Player", // Nom du modèle Sequelize (PascalCase recommandé)
         {
             player_id: {
@@ -64,6 +64,4 @@ export default (sequelize: Sequelize) => {
             timestamps: false
         }
     );
-
-    return PlayerModel;
 };

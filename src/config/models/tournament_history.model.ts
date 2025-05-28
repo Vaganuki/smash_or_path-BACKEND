@@ -1,8 +1,8 @@
-import { DataTypes, Sequelize, Model } from "sequelize";
-import { TournamentHistory } from "../../@types/types";
+import {DataTypes, Sequelize, Model} from "sequelize";
+import {TournamentHistory} from "../../@types/types";
 
 export default (sequelize: Sequelize) => {
-    const TournamentHistoryModel = sequelize.define<TournamentHistory>(
+    return sequelize.define<Model<TournamentHistory>>(
         "TournamentHistory",
         {
             tournament_history_id: {
@@ -24,6 +24,4 @@ export default (sequelize: Sequelize) => {
             timestamps: false
         }
     );
-
-    return TournamentHistoryModel;
 };
