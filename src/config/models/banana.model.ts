@@ -1,8 +1,8 @@
-import { DataTypes, Sequelize } from "sequelize";
+import {DataTypes, Model, Sequelize} from "sequelize";
 import { Banana } from "../../@types/types";
 
 export default (sequelize: Sequelize) => {
-    const BananaModel = sequelize.define<Banana>(
+    return sequelize.define<Model<Banana>>(
         "Banana", // PascalCase recommandé pour les noms de modèles Sequelize
         {
             banana_id: {
@@ -20,6 +20,4 @@ export default (sequelize: Sequelize) => {
             timestamps: false
         }
     );
-
-    return BananaModel;
 };

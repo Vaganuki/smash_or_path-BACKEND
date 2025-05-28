@@ -1,8 +1,9 @@
-import { DataTypes, Sequelize, Model, InferAttributes, InferCreationAttributes } from "sequelize";
+import { DataTypes, Sequelize, Model} from "sequelize";
+import {Eats} from "../../@types/types";
 
 // Optionnel : Typage TypeScript pour le modèle Eats
 export default (sequelize: Sequelize) => {
-    const EatsModel = sequelize.define<Model<InferAttributes<any>, InferCreationAttributes<any>>>(
+    return sequelize.define<Model<Eats>>(
         "Eats",
         {
             player_id: {
@@ -29,6 +30,4 @@ export default (sequelize: Sequelize) => {
             timestamps: false
         }
     );
-
-    return EatsModel;
 };

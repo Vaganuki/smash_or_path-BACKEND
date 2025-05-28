@@ -1,8 +1,8 @@
-import { DataTypes, Sequelize } from "sequelize";
+import {DataTypes, Model, Sequelize} from "sequelize";
 import { Participates } from "../../@types/types";
 
 export default (sequelize: Sequelize) => {
-    const ParticipatesModel = sequelize.define<Participates>(
+    return sequelize.define<Model<Participates>>(
         "Participates",
         {
             player_id: {
@@ -38,5 +38,4 @@ export default (sequelize: Sequelize) => {
         }
     );
     
-    return ParticipatesModel;
 };

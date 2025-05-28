@@ -1,12 +1,12 @@
 import { Dialect, Sequelize } from 'sequelize';
-import { Db } from '../@types/types';
+import { Db } from '../../@types/types';
 
 import championBuilder from './champion.model';
 import bananaBuilder from './banana.model';
 import playerBuilder from './player.model';
 import skinBuilder from './skin.model';
 import fightBuilder from './fight.model';
-import tournamentBuilder from './tournament.model';
+import tournamentBuilder from "./tournament.model";
 import historyBuilder from './history.model';
 import tournamentHistoryBuilder from './tournament_history.model';
 import prefersBuilder from './prefers.model';
@@ -88,6 +88,7 @@ Player.belongsToMany(Tournament, { through: Participates, foreignKey: 'player_id
 Tournament.belongsToMany(Player, { through: Participates, foreignKey: 'tournament_id', otherKey: 'player_id' });
 
 // Export des modèles
+
 const db: Db = {
     sequelize,
     Champion,

@@ -6,7 +6,7 @@ import {Tournament as TournamentAttributes} from '../../@types/types'; // w/e th
 
 // ! CONFIGURATION DU MODÈLE "TOURNAMENT" ! \\
 
-export const Tournament = (sequelize: Sequelize) => {
+export default (sequelize: Sequelize) => {
     return sequelize.define<Model<TournamentAttributes>>(
         'Tournament',
         {
