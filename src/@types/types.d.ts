@@ -65,19 +65,19 @@ export interface TournamentHistory extends Model<InferAttributes<TournamentHisto
     tournament_history_id: CreationOptional<number>;
     tournament_id: ForeignKey<Tournament["tournament_id"]>;
 }
-export interface Prefers extends Model<InferAttributes<prefers>, InferCreationAttributes<prefers>> {
+export interface Prefers extends Model<InferAttributes<Prefers>, InferCreationAttributes<Prefers>> {
     player_id: ForeignKey<Player["player_id"]>;
     champion_id: ForeignKey<Champion["champion_id"]>;
 }
-export interface Eats extends Model<InferAttributes<eats>, InferCreationAttributes<eats>> {
+export interface Eats extends Model<InferAttributes<Eats>, InferCreationAttributes<Eats>> {
     player_id: ForeignKey<Player["player_id"]>;
     banana_id: ForeignKey<Banana["banana_id"]>;
 }
-export interface Plays extends Model<InferAttributes<plays>, InferCreationAttributes<plays>> {
+export interface Plays extends Model<InferAttributes<Plays>, InferCreationAttributes<Plays>> {
     player_id: ForeignKey<Player["player_id"]>;
     fight_id: ForeignKey<Fight["fight_id"]>;
 }
-export interface Participates extends Model<InferAttributes<participates>, InferCreationAttributes<participates>> {
+export interface Participates extends Model<InferAttributes<Participates>, InferCreationAttributes<Participates>> {
     player_id: ForeignKey<Player["player_id"]>;
     tournament_id: ForeignKey<Tournament["tournament_id"]>;
 }
