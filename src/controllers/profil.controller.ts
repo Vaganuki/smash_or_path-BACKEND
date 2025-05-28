@@ -68,6 +68,25 @@ export class ProfilController {
             res.status(500).json({ error: "Server error." });
         }
     }
+    static async updatePlayerActiveStatus(req: Request, res: Response) {
+        const {playerId} = req.params;
+            const {is_active} = req.body;
+            if(typeof is_active === "boolean"){
+                return res.status(400).json({error: "is_active must be a boolean value."});
+            }
+            try{
+             const [updatedRows] = await db.Player.update(
+                 {is_active},
+                 {where: { id: playerId }}
+             );
+                if(updatedRows === 0){
+                    return res.status(404).json({error: "Player not found."});
+                }
+            }catch (error) {
+                console.error("Error while updating player active status:", error);
+                res.status(500).json({error: "Server error."});
+            }
+    }
 
     // ! AFFICHAGE D'UN JOUEUR PAR ID ! \\
     static async getProfilById(req: any, res: any, next: NextFunction) {
