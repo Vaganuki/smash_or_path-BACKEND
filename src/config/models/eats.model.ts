@@ -19,5 +19,5 @@ export default (sequelize: Sequelize) => {
             timestamps: false // Pas de colonnes createdAt/updatedAt
         }
     );
-    return EatsModel;
+    return EatsModel; 
 };
