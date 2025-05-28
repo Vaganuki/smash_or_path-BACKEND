@@ -1,20 +1,33 @@
 import {NextFunction} from "express";
+import sequelize from "../config/database";
 
 export class ProfilController {
+
+
     //? modification d'un profil
     static async updatePlayer(req: Request, res: Response) {
         try {
             // Récupère l'ID de l'utilisateur connecté
             const playerId = req.player?.id;
             if (!playerId) {
-                return res.status(401).json({ error: "Unauthenticated user." });
+                return res.status(401).json({error: "Unauthenticated user."});
             }
 
-            const { favorite_champion_id, hated_champion_id, email, password, pseudo, elo, tournament_won, is_active } = req.body;
+            const {
+                favorite_champion_id,
+                hated_champion_id,
+                email,
+                password,
+                pseudo,
+                elo,
+                tournament_won,
+                is_active
+            } = req.body;
 
             // Vérifie que tous les champs obligatoires sont remplis.
-            if (!favorite_champion_id && !hated_champion_id && !email && !password && !pseudo && !elo && !tournament_won, && !is_active) {
-                return res.status(400).json({ error: "No data to update." });
+            if (!favorite_champion_id && !hated_champion_id && !email && !password && !pseudo && !elo && !tournament_won, && !is_active)
+            {
+                return res.status(400).json({error: "No data to update."});
             }
 
             // Prépare l'objet de mise à jour
@@ -36,9 +49,9 @@ export class ProfilController {
             if (is_active) updateFields.is_active = is_active;
             if (email) {
                 // Vérifier si l'email est déjà utilisé
-                const existingPlayerEmail = await db.player.findOne({ where: { email, id: { [Op.ne]: playerId } } });
+                const existingPlayerEmail = await sequelize.player.findOne({where: {email, id: {[Op.ne]: playerId}}});
                 if (existingPlayerEmail) {
-                    return res.status(409).json({ error: "This email is already in use." });
+                    return res.status(409).json({error: "This email is already in use."});
                 }
                 updateFields.email = email;
             }
@@ -48,14 +61,14 @@ export class ProfilController {
             }
 
             // Met à jour le profil du joueur dans la base de données
-            const [updatedRowsCount, [updatedPlayer]] = await db.player.update(updateFields, {
-                where: { id: playerId }, // Met à jour uniquement le joueur connecté (par son id)
+            const [updatedRowsCount, [updatedPlayer]] = await sequelize.player.update(updateFields, {
+                where: {id: playerId}, // Met à jour uniquement le joueur connecté (par son id)
                 returning: true, // Retourne le joueur mis à jour (utile avec PostgreSQL)
             });
 
             // Vérifie si la mise à jour a bien eu lieu
             if (updatedRowsCount === 0) {
-                return res.status(404).json({ error: "User not found." });
+                return res.status(404).json({error: "User not found."});
             }
 
             // Retourne un message de succès et l'utilisateur mis à jour
@@ -65,7 +78,7 @@ export class ProfilController {
             });
         } catch (error) {
             console.error("Error while updating a user:", error);
-            res.status(500).json({ error: "Server error." });
+            res.status(500).json({error: "Server error."});
         }
     }
 
@@ -74,8 +87,8 @@ export class ProfilController {
         try {
             const {id} = req.params;
 
-            // * "User" DANS "db.User.findByPk(id);" À MODIFIER SELON SYNTAXE CHOISIE
-            const user = await db.User.findByPk(id);
+            // * "User" DANS "sequelize.User.findByPk(id);" À MODIFIER SELON SYNTAXE CHOISIE
+            const user = await sequelize.User.finsequelizeyPk(id);
 
             if (!user) {
                 const error = new Error("Impossible de trouver cet utilisateur !");
@@ -127,6 +140,65 @@ export class ProfilController {
             res.status(500).json({error: 'Server error'});
         }
     };
+
+    static async updatePlayerActiveStatus(req: Request, res: Response) {
+        const {playerId} = req.params;
+        const {is_active} = req.body;
+        if(typeof is_active === "boolean"){
+            return res.status(400).json({error: "is_active must be a boolean value."});
+        }
+        try{
+            const [updatedRows] = await db.Player.update(
+                {is_active},
+                {where: { id: playerId }}
+            );
+            if(updatedRows === 0){
+                return res.status(404).json({error: "Player not found."});
+            }
+        }catch (error) {
+            console.error("Error while updating player active status:", error);
+            res.status(500).json({error: "Server error."});
+        }
+    }
+
+    static async registerProfile(req: Request, res: Response): Promise<void> {
+        const { email, password, pseudo, prenom, nom } = req.body;
+
+        if (!email || !password || !pseudo || !prenom || !nom) {
+            res.status(400).json({ message: 'Tous les champs sont requis.' });
+            return;
+        }
+
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const newUser = await Profil.create({
+                email,
+                password: hashedPassword,
+                pseudo,
+                prenom,
+                nom
+            });
+
+            res.status(201).json({
+                message: 'Utilisateur créé avec succès.',
+                user: {
+                    id: newUser.getDataValue('id'),
+                    email: newUser.getDataValue('email'),
+                    pseudo: newUser.getDataValue('pseudo'),
+                    prenom: newUser.getDataValue('prenom'),
+                    nom: newUser.getDataValue('nom')
+                }
+            });
+        } catch (error: any) {
+            console.error(error);
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                res.status(409).json({ message: 'Email déjà utilisé.' });
+            } else {
+                res.status(500).json({ message: 'Erreur serveur.' });
+            }
+        }
+    }
 
     // sélection du perso préféré et son skin et du perso le plus détesté (liste déroulante pour les 3) et envoi vers la DB
     async favoriteHatedChar(req: any, res: any) {
