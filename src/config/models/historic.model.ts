@@ -1,9 +1,9 @@
 export interface HistoricModel {
     id: number;
-    player1: string;
-    player2: string;
-    characterPlayer1: string;
-    characterPlayer2: string;
-    winningPlayer: string;
+    player1_id: number;
+    player2_id: number;
+    champion_player_id1: number;
+    champion_player_id2: number;
+    winningPlayer: number;
     remainingLifes: number;
 }
