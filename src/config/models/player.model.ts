@@ -56,4 +56,5 @@ export default (sequelize: Sequelize) => {
         }
     );
     return PlayerModel;
+    
 };
