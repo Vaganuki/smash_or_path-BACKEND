@@ -1,26 +1,29 @@
-import {Banana, Eats, Player, TournamentHistory} from "../../@types/types";
 import { DataTypes, Sequelize, Model } from "sequelize";
+import { TournamentHistory } from "../../@types/types";
 
 export default (sequelize: Sequelize) => {
-    const Tournament_historyModel = sequelize.define<TournamentHistory>(
-        "tournament_history",
+    const TournamentHistoryModel = sequelize.define<TournamentHistory>(
+        "TournamentHistory",
         {
-            tournament_history_id:{
+            tournament_history_id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
-                primaryKey: true,
-                unique: true
+                primaryKey: true
             },
             tournament_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: false,
+                references: {
+                    model: "tournament", // nom de la table référencée
+                    key: "tournament_id"
+                }
             }
-
         },
         {
-            tableName: "tournament_history", // Nom de la table dans la base de données
-            timestamps: false // Pas de colonnes createdAt/updatedAt
+            tableName: "tournament_history",
+            timestamps: false
         }
     );
-    return Tournament_historyModel;
+
+    return TournamentHistoryModel;
 };

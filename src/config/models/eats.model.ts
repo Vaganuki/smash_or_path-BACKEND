@@ -1,23 +1,34 @@
-import {Eats, Player} from "../../@types/types";
-import { DataTypes, Sequelize, Model } from "sequelize";
+import { DataTypes, Sequelize, Model, InferAttributes, InferCreationAttributes } from "sequelize";
 
+// Optionnel : Typage TypeScript pour le modèle Eats
 export default (sequelize: Sequelize) => {
-    const EatsModel = sequelize.define<Eats>(
-        "eats",
+    const EatsModel = sequelize.define<Model<InferAttributes<any>, InferCreationAttributes<any>>>(
+        "Eats",
         {
             player_id: {
-                player_id : DataTypes.INTEGER,
-                allowNull: true
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                primaryKey: true,
+                references: {
+                    model: "player", // Nom de la table (pas la fonction)
+                    key: "player_id"
+                }
             },
             banana_id: {
                 type: DataTypes.INTEGER,
-                allowNull: true
+                allowNull: false,
+                primaryKey: true,
+                references: {
+                    model: "banana", // Nom de la table
+                    key: "banana_id"
+                }
             }
         },
         {
-            tableName: "eats", // Nom de la table dans la base de données
-            timestamps: false // Pas de colonnes createdAt/updatedAt
+            tableName: "eats",
+            timestamps: false
         }
     );
+
     return EatsModel;
 };

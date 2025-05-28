@@ -1,60 +1,69 @@
-import {Player} from "../../@types/types";
-import { DataTypes, Sequelize, Model } from "sequelize";
+import { DataTypes, Sequelize } from "sequelize";
+import { Player } from "../../@types/types";
 
 export default (sequelize: Sequelize) => {
     const PlayerModel = sequelize.define<Player>(
-        "player",
+        "Player", // Nom du modèle Sequelize (PascalCase recommandé)
         {
             player_id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
-                primaryKey: true,
+                primaryKey: true
+            },
+            email: {
+                type: DataTypes.STRING(100),
+                allowNull: false,
+                unique: true,
+                validate: {
+                    isEmail: true
+                }
+            },
+            pseudo: {
+                type: DataTypes.STRING(100),
+                allowNull: false,
                 unique: true
             },
-            email:{
-                type: DataTypes.STRING,
+            password: {
+                type: DataTypes.STRING(1024),
+                allowNull: false
+            },
+            elo: {
+                type: DataTypes.INTEGER,
                 allowNull: false,
-                unique: true, // L'email doit être unique
-                validate: {
-                    isEmail: true // Validation que la valeur est un email
-                }},
-                pseudo : {
-                    type: DataTypes.STRING,
-                    allowNull: false
-                },
-                password : {
-                    type: DataTypes.STRING,
-                    allowNull: false
-                },
-                elo:{
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                    defaultValue: 0 // Valeur par défaut pour l'Elo
-                },
-                tournament_won :{
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                    defaultValue: 0 // Valeur par défaut pour le nombre de tournois gagnés
-                },
-                favorite_champion_id :{
-                    type: DataTypes.INTEGER,
-                    allowNull: true // Peut être nul si aucun champion favori n'est défini
-                },
-                hated_champion_id : {
-                    type: DataTypes.INTEGER,
-                    allowNull: true // Peut être nul si aucun champion détesté n'est défini
-                },
-                is_active   : {
-                    type: DataTypes.BOOLEAN,
-                    allowNull: false,
-                    defaultValue: true // Valeur par défaut pour l'état actif du joueur
-                },
+                defaultValue: 0
+            },
+            tournament_won: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                defaultValue: 0
+            },
+            favorite_champion_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "champion",
+                    key: "champion_id"
+                }
+            },
+            hated_champion_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "champion",
+                    key: "champion_id"
+                }
+            },
+            is_active: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: true
+            }
         },
         {
-            tableName: "player", // Nom de la table dans la base de données
-            timestamps: false // Pas de colonnes createdAt/updatedAt
+            tableName: "player",
+            timestamps: false
         }
     );
+
     return PlayerModel;
-    
 };
