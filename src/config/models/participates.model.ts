@@ -37,5 +37,6 @@ export default (sequelize: Sequelize) => {
             ]
         }
     );
+    
     return ParticipatesModel;
 };
