@@ -35,7 +35,7 @@ export interface Player extends Model<InferAttributes<Player>, InferCreationAttr
 export interface Skin extends Model<InferAttributes<Skin>, InferCreationAttributes<Skin>> {
     skin_id: CreationOptional<number>;
     champion_id: ForeignKey<Champion["champion_id"]>;
-    image: string;
+    image_url: string;
 }
 export interface Fight extends Model<InferAttributes<Fight>, InferCreationAttributes<Fight>> {
     fight_id: CreationOptional<number>;
@@ -53,9 +53,10 @@ export interface Tournament extends Model<InferAttributes<Tournament>, InferCrea
     first_place_player_id: ForeignKey<Player["player_id"]>;
     second_place_player_id: ForeignKey<Player["player_id"]>;
     third_place_player_id: ForeignKey<Player["player_id"]>;
-    first_place: number;
-    second_place: number;
-    third_place: number;
+    first_place_reward: number;
+    second_place_reward: number;
+    third_place_reward: number;
+    fight_id: ForeignKey<Fight["fight_id"]>;
 }
 export interface History extends Model<InferAttributes<History>, InferCreationAttributes<History>> {
     history_id: CreationOptional<number>;
